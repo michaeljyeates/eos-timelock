@@ -4,6 +4,8 @@
 #include <string>
 #include <stdio.h>
 
+#include "timelock.hpp"
+
 using namespace eosio;
 using namespace std;
 
@@ -27,21 +29,74 @@ class timelock : public eosio::contract {
           transaction trx = eosio::unpack<transaction>(buffer, size);
 
           unsigned_int delay_sec = trx.delay_sec;
-          unsigned_int required_delay = 5;
+          unsigned_int required_delay = UINT32_MAX;
           // check that the delay satisfies the conditions
 
+          delaylimit_table limits(_self, _self);
+          auto lim = limits.begin();
+          eosio_assert( lim != limits.end() , "No delays configured");
+
+          while ( lim != limits.end() ){
+              if ( quantity.amount > lim->minimum.amount  && quantity.symbol == lim->minimum.symbol){
+                  required_delay = lim->required_delay;
+                  break;
+              }
+              lim++;
+          }
+
+          eosio_assert( (unsigned int)required_delay < UINT32_MAX, "Required delay not found");
 
           char* dbg_buffer = (char*) alloca(100);
           int n;
-          n = sprintf (dbg_buffer, "Delay was %d require %d", delay_sec, required_delay);
+          n = sprintf (dbg_buffer, "Delay was %d require %d\n", delay_sec, required_delay);
           eosio_assert( n < 100, "Debug print alloc fail" );
 
           print_f((const char *)dbg_buffer);
 
           eosio_assert( delay_sec >= required_delay, "Delay is not satisfied" );
 
-          print("Delay was satisfied, tokens sent");
+          print("Delay was satisfied, tokens sent\n");
       }
+
+      /*
+       * Adds a new entry to the limits table, start with the largest to be most secure
+       */
+        void update( uint64_t idx, asset minimum, uint64_t required_delay ) {
+            require_auth2( _self, N(owner) );
+
+          delaylimit_table limits(_self, _self);
+
+
+          auto lim = limits.find(idx);
+
+          if ( lim == limits.end() ){
+              limits.emplace(_self, [&](delaylimit &d) {
+                  d.idx = idx;
+                  d.minimum = minimum;
+                  d.required_delay = required_delay;
+              });
+          }
+          else {
+              limits.modify(lim, _self, [&](delaylimit &d) {
+                  d.minimum = minimum;
+                  d.required_delay = required_delay;
+              });
+          }
+
+
+        }
+
+        /*
+         * Resets the limits table, until new entries are added, all transfers will be blocked
+         */
+        void start(  ) {
+            delaylimit_table limits(_self, _self);
+
+            auto it = limits.begin();
+            while (it != limits.end()) {
+                it = limits.erase(it);
+            }
+        }
 };
 
 #define EOSIO_ABI_EX(TYPE, MEMBERS) \
@@ -62,4 +117,8 @@ extern "C" { \
    } \
 }
 
-EOSIO_ABI_EX(timelock, (transfer))
+EOSIO_ABI_EX(timelock,
+        (transfer)
+        (update)
+        (start)
+)
