@@ -37,7 +37,7 @@ class timelock : public eosio::contract {
           eosio_assert( lim != limits.end() , "No delays configured");
 
           while ( lim != limits.end() ){
-              if ( quantity.amount > lim->minimum.amount  && quantity.symbol == lim->minimum.symbol){
+              if ( quantity.amount >= lim->minimum.amount  && quantity.symbol == lim->minimum.symbol){
                   required_delay = lim->required_delay;
                   break;
               }
@@ -59,9 +59,9 @@ class timelock : public eosio::contract {
       }
 
       /*
-       * Adds a new entry to the limits table, start with the largest to be most secure
+       * Adds a new entry to the limits table, each row is evaluated in order of idx
        */
-        void update( uint64_t idx, asset minimum, uint64_t required_delay ) {
+        void update( uint64_t idx, asset minimum, uint32_t required_delay ) {
             require_auth2( _self, N(owner) );
 
           delaylimit_table limits(_self, _self);
@@ -91,7 +91,7 @@ class timelock : public eosio::contract {
          */
         void start(  ) {
             require_auth2( _self, N(owner) );
-            
+
             delaylimit_table limits(_self, _self);
 
             auto it = limits.begin();

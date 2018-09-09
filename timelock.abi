@@ -16,7 +16,7 @@
                     "type": "asset"
                 },{
                                                                                			"name": "required_delay",
-                                                                               			"type": "uint64"
+                                                                               			"type": "uint32"
                                                                                		}]
                   	}],
   "actions": [{

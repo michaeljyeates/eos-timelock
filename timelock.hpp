@@ -10,7 +10,7 @@ using namespace eosio;
 struct delaylimit {
     uint64_t idx = 0;
     asset minimum;
-    uint64_t required_delay = 0;
+    uint32_t required_delay = 0;
 
     uint64_t primary_key() const { return idx; }
 
