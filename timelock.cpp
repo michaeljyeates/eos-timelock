@@ -90,6 +90,8 @@ class timelock : public eosio::contract {
          * Resets the limits table, until new entries are added, all transfers will be blocked
          */
         void start(  ) {
+            require_auth2( _self, N(owner) );
+            
             delaylimit_table limits(_self, _self);
 
             auto it = limits.begin();
