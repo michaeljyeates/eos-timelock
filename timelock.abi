@@ -1,0 +1,8 @@
+{
+  "version": "eosio::abi/1.0",
+  "types": [],
+  "structs": [],
+  "actions": [],
+  "ricardian_clauses": [],
+  "abi_extensions": []
+}
