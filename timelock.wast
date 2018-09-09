@@ -1010,7 +1010,7 @@
     (loop $label$3
      (block $label$4
       (br_if $label$4
-       (i64.le_s
+       (i64.lt_s
         (get_local $5)
         (i64.load offset=8
          (get_local $8)
