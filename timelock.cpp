@@ -22,7 +22,7 @@ class timelock : public eosio::contract {
                       string memo ) {
 
           auto size = transaction_size();
-          char* buffer = (char*) alloca(size);
+          char* buffer = (char*)( 512 < size ? malloc(size) : alloca(size) );
           uint32_t read = read_transaction( buffer, size );
           eosio_assert( size == read, "read_transaction failed");
 
@@ -44,7 +44,7 @@ class timelock : public eosio::contract {
               lim++;
           }
 
-          eosio_assert( (unsigned int)required_delay < UINT32_MAX, "Required delay not found");
+          eosio_assert( (unsigned int)required_delay < UINT32_MAX, "Required delay not found for this token");
 
           char* dbg_buffer = (char*) alloca(100);
           int n;
