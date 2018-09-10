@@ -21,6 +21,11 @@ class timelock : public eosio::contract {
                       asset quantity,
                       string memo ) {
 
+          if ( from != _self){
+              // only transfers from this account
+              return;
+          }
+
           auto size = transaction_size();
           char* buffer = (char*)( 512 < size ? malloc(size) : alloca(size) );
           uint32_t read = read_transaction( buffer, size );
