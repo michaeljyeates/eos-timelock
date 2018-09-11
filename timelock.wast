@@ -11,6 +11,7 @@
  (type $FUNCSIG$iii (func (param i32 i32) (result i32)))
  (type $FUNCSIG$ijjjj (func (param i64 i64 i64 i64) (result i32)))
  (type $FUNCSIG$ijjjjii (func (param i64 i64 i64 i64 i32 i32) (result i32)))
+ (type $FUNCSIG$vj (func (param i64)))
  (type $FUNCSIG$vijjjj (func (param i32 i64 i64 i64 i64)))
  (type $FUNCSIG$vid (func (param i32 f64)))
  (type $FUNCSIG$ijj (func (param i64 i64) (result i32)))
@@ -42,6 +43,7 @@
  (import "env" "prints" (func $prints (param i32)))
  (import "env" "read_action_data" (func $read_action_data (param i32 i32) (result i32)))
  (import "env" "read_transaction" (func $read_transaction (param i32 i32) (result i32)))
+ (import "env" "require_auth" (func $require_auth (param i64)))
  (import "env" "require_auth2" (func $require_auth2 (param i64 i64)))
  (import "env" "transaction_size" (func $transaction_size (result i32)))
  (table 5 5 anyfunc)
@@ -751,6 +753,11 @@
   (i32.store offset=4
    (i32.const 0)
    (get_local $5)
+  )
+  (call $require_auth
+   (i64.load
+    (get_local $0)
+   )
   )
   (block $label$0
    (br_if $label$0

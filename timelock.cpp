@@ -21,6 +21,8 @@ class timelock : public eosio::contract {
                       asset quantity,
                       string memo ) {
 
+          require_auth( _self );
+
           if ( from != _self){
               // only transfers from this account
               return;
